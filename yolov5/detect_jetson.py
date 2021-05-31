@@ -119,11 +119,7 @@ def detect(save_img=False):
             # Stream results
             if view_img:
                 cv2.imshow(str(p), im0)
-                keyCode = cv2.waitKey(1) & 0xFF  # 1 millisecond
-                if keyCode == 27: # exit with esc button
-                     #dataset.release()
-                     cv2.destroyAllWindows()
-                     break
+                cv2.waitKey(1)  # 1 millisecond
 
             # Save results (image with detections)
             if (save_img or opt.save_img_from_stream):
