@@ -1,0 +1,13 @@
+label,cat_index
+Aerosol,0
+Bout./flac. en plastique < 8L,1
+Bout./flac. en plastique > 8L,2
+Carton à boisson,3
+DSM,4
+Emballage métallique,5
+FR,6
+Huile de friture,7
+PDP,8
+Papier-carton,9
+Verre coloré,10
+Verre incolore,11

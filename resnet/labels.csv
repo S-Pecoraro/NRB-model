@@ -1,0 +1,14 @@
+label_id,in_vision_model,label_name_fr,label_name_nl,label_name_de
+0,1,Aerosol,Aërosol,Aerosol
+1,1,Bout./flac. en plastique < 8L,Plastic fles / kolf < 8L,Bout./flac. en plastique < 8L
+2,1,Bout./flac. en plastique > 8L,Plastic fles / kolf > 8L,Bout./flac. en plastique > 8L
+3,1,Carton à boisson,Carton à boisson
+4,1,Déchets spéciaux des ménages,Déchets spéciaux des ménages,Déchets spéciaux des ménages
+5,1,Emballage métallique,Emballage métallique,Emballage métallique
+6,1,Fraction résiduelle,Fraction résiduelle,Fraction résiduelle
+7,1,Huile de friture,Huile de friture,Huile de friture
+8,1,Pot de peintures métalliques,Pot de peintures métalliques,Pot de peintures métalliques
+9,1,Papier-carton,Papier-carton,Papier-carton
+10,1,Verre coloré,Verre coloré,Verre coloré
+11,1,Verre incolore,Verre incolore,Verre incolore
+12,1,Je ne sais pas comment classer cet objet,Dit is geen verspilling,Das ist keine verschwendung
