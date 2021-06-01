@@ -1,4 +1,4 @@
-# YOLOv5 experimental modules
+# This file contains experimental modules
 
 import numpy as np
 import torch
@@ -110,9 +110,7 @@ class Ensemble(nn.ModuleList):
         return y, None  # inference, train output
 
 
-def attempt_load(weights, map_location=None, inplace=True):
-    from models.yolo import Detect, Model
-
+def attempt_load(weights, map_location=None):
     # Loads an ensemble of models weights=[a,b,c] or a single model weights=[a] or weights=a
     model = Ensemble()
     for w in weights if isinstance(weights, list) else [weights]:
@@ -122,16 +120,15 @@ def attempt_load(weights, map_location=None, inplace=True):
 
     # Compatibility updates
     for m in model.modules():
-        if type(m) in [nn.Hardswish, nn.LeakyReLU, nn.ReLU, nn.ReLU6, nn.SiLU, Detect, Model]:
-            m.inplace = inplace  # pytorch 1.7.0 compatibility
+        if type(m) in [nn.Hardswish, nn.LeakyReLU, nn.ReLU, nn.ReLU6, nn.SiLU]:
+            m.inplace = True  # pytorch 1.7.0 compatibility
         elif type(m) is Conv:
             m._non_persistent_buffers_set = set()  # pytorch 1.6.0 compatibility
 
     if len(model) == 1:
         return model[-1]  # return model
     else:
-        print(f'Ensemble created with {weights}\n')
-        for k in ['names']:
+        print('Ensemble created with %s\n' % weights)
+        for k in ['names', 'stride']:
             setattr(model, k, getattr(model[-1], k))
-        model.stride = model[torch.argmax(torch.tensor([m.stride.max() for m in model])).int()].stride  # max stride
         return model  # return ensemble

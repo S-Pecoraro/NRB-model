@@ -1,10 +1,8 @@
-# YOLOv5 PyTorch utils
+# PyTorch utils
 
-import datetime
 import logging
 import math
 import os
-import platform
 import subprocess
 import time
 from contextlib import contextmanager
@@ -45,24 +43,17 @@ def init_torch_seeds(seed=0):
         cudnn.benchmark, cudnn.deterministic = True, False
 
 
-def date_modified(path=__file__):
-    # return human-readable file modification date, i.e. '2021-3-26'
-    t = datetime.datetime.fromtimestamp(Path(path).stat().st_mtime)
-    return f'{t.year}-{t.month}-{t.day}'
-
-
-def git_describe(path=Path(__file__).parent):  # path must be a directory
+def git_describe():
     # return human-readable git description, i.e. v5.0-5-g3e25f1e https://git-scm.com/docs/git-describe
-    s = f'git -C {path} describe --tags --long --always'
-    try:
-        return subprocess.check_output(s, shell=True, stderr=subprocess.STDOUT).decode()[:-1]
-    except subprocess.CalledProcessError as e:
-        return ''  # not a git repository
+    if Path('.git').exists():
+        return subprocess.check_output('git describe --tags --long --always', shell=True).decode('utf-8')[:-1]
+    else:
+        return ''
 
 
 def select_device(device='', batch_size=None):
     # device = 'cpu' or '0' or '0,1,2,3'
-    s = f'YOLOv5 🚀 {git_describe() or date_modified()} torch {torch.__version__} '  # string
+    s = f'YOLOv5 {git_describe()} torch {torch.__version__} '  # string
     cpu = device.lower() == 'cpu'
     if cpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # force torch.cuda.is_available() = False
@@ -72,18 +63,17 @@ def select_device(device='', batch_size=None):
 
     cuda = not cpu and torch.cuda.is_available()
     if cuda:
-        devices = device.split(',') if device else range(torch.cuda.device_count())  # i.e. 0,1,6,7
-        n = len(devices)  # device count
-        if n > 1 and batch_size:  # check batch_size is divisible by device_count
+        n = torch.cuda.device_count()
+        if n > 1 and batch_size:  # check that batch_size is compatible with device_count
             assert batch_size % n == 0, f'batch-size {batch_size} not multiple of GPU count {n}'
         space = ' ' * len(s)
-        for i, d in enumerate(devices):
+        for i, d in enumerate(device.split(',') if device else range(n)):
             p = torch.cuda.get_device_properties(i)
             s += f"{'' if i == 0 else space}CUDA:{d} ({p.name}, {p.total_memory / 1024 ** 2}MB)\n"  # bytes to MB
     else:
         s += 'CPU\n'
 
-    logger.info(s.encode().decode('ascii', 'ignore') if platform.system() == 'Windows' else s)  # emoji-safe
+    logger.info(s)  # skip a line
     return torch.device('cuda:0' if cuda else 'cpu')
 
 
@@ -130,17 +120,11 @@ def profile(x, ops, n=100, device=None):
         s_in = tuple(x.shape) if isinstance(x, torch.Tensor) else 'list'
         s_out = tuple(y.shape) if isinstance(y, torch.Tensor) else 'list'
         p = sum(list(x.numel() for x in m.parameters())) if isinstance(m, nn.Module) else 0  # parameters
-        print(f'{p:12}{flops:12.4g}{dtf:16.4g}{dtb:16.4g}{str(s_in):>24s}{str(s_out):>24s}')
+        print(f'{p:12.4g}{flops:12.4g}{dtf:16.4g}{dtb:16.4g}{str(s_in):>24s}{str(s_out):>24s}')
 
 
 def is_parallel(model):
-    # Returns True if model is of type DP or DDP
     return type(model) in (nn.parallel.DataParallel, nn.parallel.DistributedDataParallel)
-
-
-def de_parallel(model):
-    # De-parallelize a model: returns single-GPU model if model is of type DP or DDP
-    return model.module if is_parallel(model) else model
 
 
 def intersect_dicts(da, db, exclude=()):
@@ -198,7 +182,7 @@ def fuse_conv_and_bn(conv, bn):
     # prepare filters
     w_conv = conv.weight.clone().view(conv.out_channels, -1)
     w_bn = torch.diag(bn.weight.div(torch.sqrt(bn.eps + bn.running_var)))
-    fusedconv.weight.copy_(torch.mm(w_bn, w_conv).view(fusedconv.weight.shape))
+    fusedconv.weight.copy_(torch.mm(w_bn, w_conv).view(fusedconv.weight.size()))
 
     # prepare spatial bias
     b_conv = torch.zeros(conv.weight.size(0), device=conv.weight.device) if conv.bias is None else conv.bias
