@@ -127,7 +127,8 @@ def detect(opt):
                 if dataset.mode == 'image':
                     cv2.imwrite(save_path, im0)
                 elif opt.source =="0":
-                    cv2.imwrite(save_path + '_img' + f'_{frame}' +'.png', im0)                  
+                    if not(len(det)==0):
+                        cv2.imwrite(save_path + '_img' + f'_{frame}' +'.png', im0)                 
                 else:  # 'video' or 'stream'
                     if vid_path != save_path:  # new video
                         vid_path = save_path

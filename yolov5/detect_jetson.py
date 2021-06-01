@@ -126,8 +126,8 @@ def detect(save_img=False):
                 if dataset.mode == 'image':
                     cv2.imwrite(save_path, im0)
                 elif dataset.mode == 'stream': # if webcam is used
-                    cv2.imwrite(save_path + '_img' + str(incr) +'.png', im0)
-                    incr = incr + 1
+                    if not(len(det)==0):
+                        cv2.imwrite(save_path + '_img' + f'_{frame}' +'.png', im0)
                 else:  # 'video'
                     if vid_path != save_path:  # new video
                         vid_path = save_path
