@@ -11,7 +11,6 @@ from tqdm import tqdm
 import argparse
 import cv2
 import io
-#import picamera as picam
 import numpy as np
 from datetime import date
 
@@ -47,27 +46,17 @@ if __name__ == '__main__':
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1920, height=(int)1080,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert !  appsink", cv2.CAP_GSTREAMER)
         if cap.isOpened():
                 cv2.namedWindow("Resnet Stream", cv2.WINDOW_AUTOSIZE)
-#        try:
                 while True :     
-		    #stream = io.BytesIO()
-		    #with picam.PiCamera() as cam :
-		    #    cam.resolution = (1024, 768)
-			#cam.start_preview()
-		    #    cam.capture(stream, format='jpeg')
-		    #stream.seek(0)
-		    #image = Image.open(stream).convert('RGB')
                     ret, img_cv2 = cap.read()
-                    #img_cv2 = cv2.cvtColor(img_cv2,cv2.COLOR_BGR2RGB)
                     image = Image.fromarray(img_cv2)
                     transform = transforms.Compose([
-		        transforms.Resize(256),
-		        transforms.CenterCrop(224),
-		        transforms.ToTensor(),
-		        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-		    ])
-	    
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+            ])
+        
                     pred = model(transform(image).unsqueeze(0).to(device))
-		    #print(pred)
                     predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                     conf = float(pred.max())
                     index_predicted_class = ref_labels.loc[int(pred.argmax())]['label_id']
@@ -99,15 +88,12 @@ if __name__ == '__main__':
                             f.close()
                             print("Log saved")
                     if cv2.waitKey(1) == ord('q'):  # q to quit
-                    	cap.release()
-                    	cv2.destroyAllWindows()
-                    	break
+                        cap.release()
+                        cv2.destroyAllWindows()
+                        break
         else :
                 print("Cannot open camera")
-	 #       except KeyboardInterrupt:
-	 #           stream.close()
-	 #           pass
-         
+
     else :
         for im in tqdm(os.listdir(FOLDER_PATH)):
             try:
