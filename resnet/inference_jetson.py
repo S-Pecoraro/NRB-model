@@ -36,7 +36,8 @@ if __name__ == '__main__':
     num_ftrs = model.fc.in_features
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
-    model.fc = nn.Linear(num_ftrs, len(ref_labels))
+    # model.fc = nn.Linear(num_ftrs, len(ref_labels))
+    model.fc = nn.Sequential(nn.Linear(num_ftrs, len(ref_labels)), nn.Softmax())
     
 
     model = model.to(device)

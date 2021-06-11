@@ -32,15 +32,15 @@ if __name__ == '__main__':
         if not os.path.isdir(str(label)):
             os.mkdir(str(label))
     
-    model = models.resnet50(pretrained=False)#put false when good weight
+    model = models.resnet50(pretrained=False)
     num_ftrs = model.fc.in_features
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
-    model.fc = nn.Linear(num_ftrs, len(ref_labels))
+    # model.fc = nn.Linear(num_ftrs, len(ref_labels))
+    model.fc = nn.Sequential(nn.Linear(num_ftrs, len(ref_labels)), nn.Softmax())
     
-
     model = model.to(device)
-    model.load_state_dict(torch.load(opt.weights), strict = False) ## Waiting for a good trained weight ##
+    model.load_state_dict(torch.load(opt.weights), strict = False)
     model.eval()
     if opt.source == str(0) : #camera is used
         cap = cv2.VideoCapture("0")
