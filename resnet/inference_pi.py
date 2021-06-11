@@ -9,6 +9,8 @@ from os import path
 from shutil import copy
 from tqdm import tqdm
 import argparse
+from picamera import PiCamera
+import picamera.array
 import cv2
 import io
 import numpy as np
@@ -40,10 +42,13 @@ if __name__ == '__main__':
     model.fc = nn.Sequential(nn.Linear(num_ftrs, len(ref_labels)), nn.Softmax())
     
     model = model.to(device)
-    model.load_state_dict(torch.load(opt.weights), strict = False)
+    model.load_state_dict(torch.load(opt.weights), strict = False) if torch.cuda.is_available() else model.load_state_dict(torch.load(opt.weights, map_location=torch.device('cpu')), strict = False)
     model.eval()
     if opt.source == str(0) : #camera is used
-        cap = cv2.VideoCapture("0")
+        cap = cv2.VideoCapture(0)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+        cap.set(cv2.CAP_PROP_FPS, 40)
         if cap.isOpened():
                 cv2.namedWindow("Resnet Stream", cv2.WINDOW_AUTOSIZE)
                 while True :     
