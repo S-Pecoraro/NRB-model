@@ -13,6 +13,7 @@ import cv2
 import io
 import numpy as np
 from datetime import date
+import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--weights', nargs='+', type=str, default='model.pt', help='model.pt path(s)')
@@ -36,9 +37,7 @@ if __name__ == '__main__':
     num_ftrs = model.fc.in_features
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
-    # model.fc = nn.Linear(num_ftrs, len(ref_labels))
-    model.fc = nn.Sequential(nn.Linear(num_ftrs, len(ref_labels)), nn.Softmax())
-    
+    model.fc = nn.Linear(num_ftrs, len(ref_labels))    
 
     model = model.to(device)
     model.load_state_dict(torch.load(opt.weights), strict = False)
@@ -47,7 +46,8 @@ if __name__ == '__main__':
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1920, height=(int)1080,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert !  appsink", cv2.CAP_GSTREAMER)
         if cap.isOpened():
                 cv2.namedWindow("Resnet Stream", cv2.WINDOW_AUTOSIZE)
-                while True :     
+                while True :
+                    time1 = time.time()
                     ret, img_cv2 = cap.read()
                     image = Image.fromarray(img_cv2)
                     transform = transforms.Compose([
@@ -57,11 +57,14 @@ if __name__ == '__main__':
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
         
-                    pred = model(transform(image).unsqueeze(0).to(device))
+                    pred = model(transform(image).unsqueeze(0).to(device)).squeeze()
+                    pred = nn.functional.softmax(pred,dim=0)
                     predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                     conf = float(pred.max())
                     index_predicted_class = ref_labels.loc[int(pred.argmax())]['label_id']
-                    string = str(predicted_class) + '(' + str(index_predicted_class)+ ') ' + ": " + str(conf)+'\n' 
+                    time2 = time.time()
+                    time_predict = time2-time1
+                    string = str(predicted_class) + '(' + str(index_predicted_class)+ ') ' + ": " + str(conf)+ " ("+ str(time_predict) +"s)"+'\n' 
                     print(string)
                     font = cv2.FONT_HERSHEY_SIMPLEX
                     cv2.putText(img_cv2, string, (10,30), font,1, (255,255,255),2)
