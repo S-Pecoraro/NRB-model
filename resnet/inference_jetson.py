@@ -32,7 +32,7 @@ if __name__ == '__main__':
         if not os.path.isdir(str(label)):
             os.mkdir(str(label))
     
-    model = models.resnet50(pretrained=False)#put false when good weight
+    model = models.resnet50(pretrained=False)
     num_ftrs = model.fc.in_features
     # Here the size of each output sample is set to 2.
     # Alternatively, it can be generalized to nn.Linear(num_ftrs, len(class_names)).
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     
 
     model = model.to(device)
-    model.load_state_dict(torch.load(opt.weights), strict = False) ## Waiting for a good trained weight ##
+    model.load_state_dict(torch.load(opt.weights), strict = False)
     model.eval()
     if opt.source == str(0) : #camera is used
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1920, height=(int)1080,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert !  appsink", cv2.CAP_GSTREAMER)
@@ -108,7 +108,6 @@ if __name__ == '__main__':
                             ])
                 
                 pred = model(transform(image).unsqueeze(0).to(device))
-                #print(pred)
                 predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                 conf = float(pred.max())
                 print(str(predicted_class) + ": " + str(conf))

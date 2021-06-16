@@ -9,8 +9,6 @@ from os import path
 from shutil import copy
 from tqdm import tqdm
 import argparse
-from picamera import PiCamera
-import picamera.array
 import cv2
 import io
 import numpy as np
@@ -62,7 +60,6 @@ if __name__ == '__main__':
             ])
         
                     pred = model(transform(image).unsqueeze(0).to(device))
-                    #print(pred)
                     predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                     conf = float(pred.max())
                     index_predicted_class = ref_labels.loc[int(pred.argmax())]['label_id']
@@ -99,7 +96,7 @@ if __name__ == '__main__':
                         break
         else :
                 print("Cannot open camera")
-         
+                
     else :
         for im in tqdm(os.listdir(FOLDER_PATH)):
             try:
