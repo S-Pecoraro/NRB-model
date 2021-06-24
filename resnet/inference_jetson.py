@@ -120,3 +120,4 @@ if __name__ == '__main__':
                 pass
     time_end = time.time() - time1
     print(str(time_end) + "s\n")
+    time1 = time.time()
