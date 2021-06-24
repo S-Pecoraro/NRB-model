@@ -103,6 +103,7 @@ if __name__ == '__main__':
                 
     else :
         for im in tqdm(os.listdir(FOLDER_PATH)):
+            time_img = time.time()
             try:
                 img_path = os.path.join(FOLDER_PATH, im)
                 image = Image.open(img_path).convert('RGB')
@@ -117,7 +118,7 @@ if __name__ == '__main__':
                 pred = nn.functional.softmax(pred,dim=0)
                 predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                 conf = float(pred.max())
-                print(str(predicted_class) + ": " + str(conf))
+                print(str(predicted_class) + ": " + str(conf) + "blablabla")
                 copy(img_path, str(predicted_class))
             except:
                 pass
