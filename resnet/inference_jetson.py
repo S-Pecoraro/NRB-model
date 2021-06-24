@@ -48,6 +48,7 @@ if __name__ == '__main__':
         if cap.isOpened():
                 cv2.namedWindow("Resnet Stream", cv2.WINDOW_AUTOSIZE)
                 while True :
+                    time_cam = time.time()
                     ret, img_cv2 = cap.read()
                     image = Image.fromarray(img_cv2)
                     transform = transforms.Compose([
@@ -95,6 +96,8 @@ if __name__ == '__main__':
                         cap.release()
                         cv2.destroyAllWindows()
                         break
+                    time_cam_end = time.time()-time_cam
+                    print(str(time_cam_end) + "s\n")                    
         else :
                 print("Cannot open camera")
 
@@ -114,10 +117,7 @@ if __name__ == '__main__':
                 pred = nn.functional.softmax(pred,dim=0)
                 predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                 conf = float(pred.max())
-                print(str(predicted_class) + ": " + str(conf))
+                print(str(predicted_class) + ": " + str(conf) + "blablabla")
                 copy(img_path, str(predicted_class))
             except:
                 pass
-    time_end = time.time() - time1
-    print(str(time_end) + "s\n")
-    time1 = time.time()
