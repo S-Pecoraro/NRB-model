@@ -97,15 +97,15 @@ if __name__ == '__main__':
                         cap.release()
                         cv2.destroyAllWindows()
                         break
-                    time_cam_end = time.time()-time_cam
-                    print(str(time_cam_end) + "s\n")
+                    #time_cam_end = time.time()-time_cam
+                    #print(str(time_cam_end) + "s\n")
         else :
                 print("Cannot open camera")
                 
     else :
         for im in tqdm(os.listdir(FOLDER_PATH)):
             try:
-                time_begin = time.time()
+                #time_begin = time.time()
                 img_path = os.path.join(FOLDER_PATH, im)
                 image = Image.open(img_path).convert('RGB')
                 transform = transforms.Compose([
@@ -117,10 +117,10 @@ if __name__ == '__main__':
                 
                 pred = model(transform(image).unsqueeze(0).to(device)).squeeze()
                 pred = nn.functional.softmax(pred,dim=0)
-                time_pred = time.time() - time_begin
+                #time_pred = time.time() - time_begin
                 predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                 conf = float(pred.max())
-                print(str(predicted_class) + ": " + str(conf)+ " ("+str(time_pred) + "s)\n")
+                print(str(predicted_class) + ": " + str(conf)) #+ " ("+str(time_pred) + "s)\n")
                 copy(img_path, str(predicted_class))
             except:
                 pass
