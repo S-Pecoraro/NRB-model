@@ -42,7 +42,6 @@ if __name__ == '__main__':
     model = model.to(device)
     model.load_state_dict(torch.load(opt.weights), strict = False) if torch.cuda.is_available() else model.load_state_dict(torch.load(opt.weights, map_location=torch.device('cpu')), strict = False)
     model.eval()
-    time1 = time.time()
     if opt.source == str(0) : #camera is used
         cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
@@ -60,14 +59,13 @@ if __name__ == '__main__':
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
-        
                     pred = model(transform(image).unsqueeze(0).to(device)).squeeze()
                     pred = nn.functional.softmax(pred,dim=0)
                     predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                     conf = float(pred.max())
                     index_predicted_class = ref_labels.loc[int(pred.argmax())]['label_id']
                     time2 = time.time()
-                    time_predict = time2-time1
+                    time_predict = time2-time_cam
                     string = str(predicted_class) + '(' + str(index_predicted_class)+ ') ' + ": " + str(conf)+ " ("+ str(time_predict) +"s)"+'\n' 
                     print(string)
                     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -107,6 +105,7 @@ if __name__ == '__main__':
     else :
         for im in tqdm(os.listdir(FOLDER_PATH)):
             try:
+                time_begin = time.time()
                 img_path = os.path.join(FOLDER_PATH, im)
                 image = Image.open(img_path).convert('RGB')
                 transform = transforms.Compose([
@@ -118,12 +117,10 @@ if __name__ == '__main__':
                 
                 pred = model(transform(image).unsqueeze(0).to(device)).squeeze()
                 pred = nn.functional.softmax(pred,dim=0)
+                time_pred = time.time() - time_begin
                 predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                 conf = float(pred.max())
-                print(str(predicted_class) + ": " + str(conf))
+                print(str(predicted_class) + ": " + str(conf)+ " ("+str(time_pred) + "s)\n")
                 copy(img_path, str(predicted_class))
             except:
                 pass
-    time_end = time.time() - time1
-    print(str(time_end) + "s\n")
-    time1 = time.time()

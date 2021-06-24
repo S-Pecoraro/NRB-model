@@ -42,7 +42,6 @@ if __name__ == '__main__':
     model = model.to(device)
     model.load_state_dict(torch.load(opt.weights), strict = False)
     model.eval()
-    time1 = time.time()
     if opt.source == str(0) : #camera is used
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1920, height=(int)1080,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert !  appsink", cv2.CAP_GSTREAMER)
         if cap.isOpened():
@@ -64,7 +63,7 @@ if __name__ == '__main__':
                     conf = float(pred.max())
                     index_predicted_class = ref_labels.loc[int(pred.argmax())]['label_id']
                     time2 = time.time()
-                    time_predict = time2-time1
+                    time_predict = time2-time_cam
                     string = str(predicted_class) + '(' + str(index_predicted_class)+ ') ' + ": " + str(conf)+ " ("+ str(time_predict) +"s)"+'\n' 
                     print(string)
                     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -104,6 +103,7 @@ if __name__ == '__main__':
     else :
         for im in tqdm(os.listdir(FOLDER_PATH)):
             try:
+                time_begin = time.time()
                 img_path = os.path.join(FOLDER_PATH, im)
                 image = Image.open(img_path).convert('RGB')
                 transform = transforms.Compose([
@@ -115,9 +115,10 @@ if __name__ == '__main__':
                 
                 pred = model(transform(image).unsqueeze(0).to(device)).squeeze()
                 pred = nn.functional.softmax(pred,dim=0)
+                time_pred = time.time() - time_begin
                 predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                 conf = float(pred.max())
-                print(str(predicted_class) + ": " + str(conf) + "blablabla")
+                print(str(predicted_class) + ": " + str(conf) + " ("+str(time_pred) + "s)\n")
                 copy(img_path, str(predicted_class))
             except:
                 pass
