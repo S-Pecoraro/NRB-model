@@ -42,12 +42,12 @@ if __name__ == '__main__':
     model = model.to(device)
     model.load_state_dict(torch.load(opt.weights), strict = False)
     model.eval()
+    time1 = time.time()
     if opt.source == str(0) : #camera is used
         cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1920, height=(int)1080,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert !  appsink", cv2.CAP_GSTREAMER)
         if cap.isOpened():
                 cv2.namedWindow("Resnet Stream", cv2.WINDOW_AUTOSIZE)
                 while True :
-                    time1 = time.time()
                     ret, img_cv2 = cap.read()
                     image = Image.fromarray(img_cv2)
                     transform = transforms.Compose([

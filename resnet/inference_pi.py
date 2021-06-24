@@ -42,6 +42,7 @@ if __name__ == '__main__':
     model = model.to(device)
     model.load_state_dict(torch.load(opt.weights), strict = False) if torch.cuda.is_available() else model.load_state_dict(torch.load(opt.weights, map_location=torch.device('cpu')), strict = False)
     model.eval()
+    time1 = time.time()
     if opt.source == str(0) : #camera is used
         cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
@@ -50,7 +51,6 @@ if __name__ == '__main__':
         if cap.isOpened():
                 cv2.namedWindow("Resnet Stream", cv2.WINDOW_AUTOSIZE)
                 while True :
-                    time1 = time.time()
                     ret, img_cv2 = cap.read()
                     image = Image.fromarray(img_cv2)
                     transform = transforms.Compose([
