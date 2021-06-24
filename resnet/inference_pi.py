@@ -113,10 +113,13 @@ if __name__ == '__main__':
                                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
                             ])
                 
-                pred = model(transform(image).unsqueeze(0).to(device))
+                pred = model(transform(image).unsqueeze(0).to(device)).squeeze()
+                pred = nn.functional.softmax(pred,dim=0)
                 predicted_class = ref_labels.loc[int(pred.argmax())]['label_name_fr']
                 conf = float(pred.max())
                 print(str(predicted_class) + ": " + str(conf))
                 copy(img_path, str(predicted_class))
             except:
                 pass
+    time_end = time.time() - time1
+    print(str(time_end) + "s\n")
